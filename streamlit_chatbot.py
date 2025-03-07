@@ -1,79 +1,34 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
 
-# 🔹 Configure Gemini API Key (Replace with your actual key)
-GENAI_API_KEY = "AIzaSyCmP8ackcLuSPsKMsHj4OtftAikZz4AZiI"  # Replace with your actual key
-genai.configure(api_key=GENAI_API_KEY)
+# 🔹 Configure Voiceflow API Key (Replace with your actual key)
+VOICEFLOW_API_KEY = "VF.DM.67cb43277d87a3d423e8c128.iikFz5hVETfN02R7"  # Replace with your actual Voiceflow API Key
+USER_ID = "test_user"  # Unique user ID to track conversations
 
-# 🔹 Load a valid Gemini model
-model = genai.GenerativeModel("gemini-1.5-pro-latest")  # Updated model name
+# 🔹 Function to get a response from Voiceflow
 
-# 🔹 Streamlit UI with Custom CSS Fixes
+def chat_with_voiceflow(prompt):
+    url = f"https://general-runtime.voiceflow.com/state/user/{USER_ID}/interact"
+    headers = {
+        "Authorization": VOICEFLOW_API_KEY,
+        "Content-Type": "application/json"
+    }
+    data = {"action": {"type": "text", "payload": prompt}}
+    
+    response = requests.post(url, json=data, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json()[0]["payload"]["message"]
+    else:
+        return f"⚠️ Error: {response.status_code} - {response.text}"
+
+# 🔹 Streamlit UI
 st.markdown("""
     <style>
-        /* 🔹 Page Background */
-        body {
-            background-color: #141e30;
-            color: white;
-        }
-
-        /* 🔹 Custom chat bubble styling */
-        .chat-bubble {
-            padding: 12px;
-            border-radius: 12px;
-            margin: 10px 0;
-            width: fit-content;
-            max-width: 80%;
-        }
-
-        .user-message {
-            background-color: rgba(0, 150, 255, 0.3);
-            text-align: right;
-            float: right;
-        }
-
-        .assistant-message {
-            background-color: rgba(0, 255, 150, 0.3);
-            text-align: left;
-            float: left;
-        }
-
-        /* 🔹 Typing animation */
-        @keyframes typing {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
-        }
-
-        .assistant-message.typing {
-            animation: typing 1.2s steps(30, end) infinite;
-        }
-
-        /* 🔹 Glowing input field */
-        input {
-            border-radius: 8px;
-            border: 2px solid #00bcd4;
-            transition: 0.3s;
-        }
-
-        input:hover, input:focus {
-            border-color: #ff4081;
-            box-shadow: 0 0 10px #ff4081;
-        }
-
-        /* 🔹 Title bounce effect */
-        h1 {
-            animation: bounceIn 1s ease-in-out;
-            text-align: center;
-            font-size: 2.5em;
-            color: #00e5ff;
-        }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0.9); opacity: 0; }
-            60% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); }
-        }
+        h1 { text-align: center; color: #00e5ff; }
+        .chat-bubble { padding: 12px; border-radius: 12px; margin: 10px 0; max-width: 80%; }
+        .user-message { background-color: rgba(0, 150, 255, 0.3); text-align: right; float: right; }
+        .assistant-message { background-color: rgba(0, 255, 150, 0.3); text-align: left; float: left; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -90,23 +45,16 @@ for msg in st.session_state.messages:
 
 # 🔹 Accept user input
 if user_input := st.chat_input("Ask me anything..."):
-    # Save user message
     st.session_state.messages.append({"role": "user", "content": user_input})
-
-    # Display user message
     st.markdown(f'<div class="chat-bubble user-message">{user_input}</div>', unsafe_allow_html=True)
-
-    # 🔹 Get AI response
+    
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         try:
-            response = model.generate_content(user_input)
-            bot_reply = response.text
+            bot_reply = chat_with_voiceflow(user_input)
         except Exception as e:
             bot_reply = f"⚠️ Error: {e}"
-
-        # Display response with custom styling
+        
         message_placeholder.markdown(f'<div class="chat-bubble assistant-message">{bot_reply}</div>', unsafe_allow_html=True)
-
-    # Save AI response
+        
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
