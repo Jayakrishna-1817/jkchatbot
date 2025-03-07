@@ -77,7 +77,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🤖 JK SMART</h1>", unsafe_allow_html=True)
+st.markdown("<h1>🤖 Chat with JK's Bot</h1>", unsafe_allow_html=True)
 
 # 🔹 Initialize chat history
 if "messages" not in st.session_state:
