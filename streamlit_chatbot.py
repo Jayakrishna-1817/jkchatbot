@@ -32,7 +32,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🤖 Chat with JK's Bot</h1>", unsafe_allow_html=True)
+st.markdown("<h1>🤖 Chat with Phani's Bot</h1>", unsafe_allow_html=True)
 
 # 🔹 Initialize chat history
 if "messages" not in st.session_state:
@@ -58,3 +58,4 @@ if user_input := st.chat_input("Ask me anything..."):
         message_placeholder.markdown(f'<div class="chat-bubble assistant-message">{bot_reply}</div>', unsafe_allow_html=True)
         
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+
